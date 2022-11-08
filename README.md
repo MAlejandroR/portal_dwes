@@ -12,7 +12,7 @@ Creamos un proyecto en laravel
 laravel new portal_dwes --git
 ```
 Instalamos la librería ***maatwebsite***
-
+   
 
 Me baso en el siguiente tutorial https://www.itsolutionstuff.com/post/laravel-maatwebsite-set-background-color-of-column-exampleexample.html
 ```shell
