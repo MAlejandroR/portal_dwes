@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AlumnosController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,4 +16,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+Route::controller(AlumnosController::class)->group(function(){
+    Route::get('alumnos', 'index');
+    Route::get('alumnos-export', 'export')->name('alumnos.export');
+    Route::post('alumnos-import', 'import')->name('alumnos.import');
 });

@@ -14,50 +14,58 @@ laravel new portal_dwes --git
 Instalamos la librería ***maatwebsite***
    
 
-Me baso en el siguiente tutorial https://www.itsolutionstuff.com/post/laravel-maatwebsite-set-background-color-of-column-exampleexample.html
+Me baso en el siguiente tutorial https://www.itsolutionstuff.com/post/laravel-9-import-export-excel-and-csv-file-tutorialexample.html
 ```shell
 cd portal_dwes
+composer require psr/simple-cache:^1.0 maatwebsite/excel
 composer require maatwebsite/excel   
 ```
-El proceso de instlación me rebota un error, de momento lo dejo pendiente
-```php
-PHP Fatal error:  Declaration of Maatwebsite\Excel\Cache\MemoryCache::get($key, $default = null) must be compatible with Psr\SimpleCache\CacheInterface::get(string $key, mixed $default = null): mixed in /home/oem/laravel/portal_dwes/vendor/maatwebsite/excel/src/Cache/MemoryCache.php on line 62
-
-Symfony\Component\ErrorHandler\Error\FatalError
-
-Declaration of Maatwebsite\Excel\Cache\MemoryCache::get($key, $default = null) must be compatible with Psr\SimpleCache\CacheInterface::get(string $key, mixed $default = null): mixed
-
-at vendor/maatwebsite/excel/src/Cache/MemoryCache.php:62
-58▕
-59▕     /**
-60▕      * {@inheritdoc}
-61▕      */
-➜  62▕     public function get($key, $default = null)
-63▕     {
-64▕         if ($this->has($key)) {
-65▕             return $this->cache[$key];
-66▕         }
-
-
-Whoops\Exception\ErrorException
-
-Declaration of Maatwebsite\Excel\Cache\MemoryCache::get($key, $default = null) must be compatible with Psr\SimpleCache\CacheInterface::get(string $key, mixed $default = null): mixed
-
-at vendor/maatwebsite/excel/src/Cache/MemoryCache.php:62
-58▕
-59▕     /**
-60▕      * {@inheritdoc}
-61▕      */
-➜  62▕     public function get($key, $default = null)
-63▕     {
-64▕         if ($this->has($key)) {
-65▕             return $this->cache[$key];
-66▕         }
-
-      +1 vendor frames 
-2   [internal]:0
-Whoops\Run::handleShutdown()
-Script @php artisan package:discover --ansi handling the post-autoload-dump event returned with error code 255
-➜  portal_dwes git:(m
+Creamos un modelo llamado alumno, en principio solo necesito el modelo y la migración, pero voy a crear el recurso completo de momento
+```shell
+php artisan make:model Alumnos --all
 ```
 
+Ahora voy a crear una clase de import en el controlador para importar datos de alumnos
+Esta parte no la veo clara. La clase import me la permite crear el paquete que hemos instalado de ***maatwebsite***
+```shell
+php artisan make:import AlumnosImport --model=Alumnos 
+
+```
+Ahora en la clase import modificamos el método model para que retorne una instancia de Alumno
+```php
+   public function model(array $row)
+    {
+        return new Alumnos([
+            //
+            "Apellido1"=>$row['Apellido1'],
+            "Apellido2"=>$row['Apellido2'],
+            "Nombre"=>$row['Nombre'],
+            "DNI"=>$row['DNI']
+        ]);
+    }
+
+```
+Aunque no lo voy a utilizar en prinicipio, siguiendo el manual, voy a crear una clase para exportar
+```shell
+php artisan make:export AlumnosExport --model=Alumnos
+```
+En esta clase agregamos el siguiente método
+```php
+    public function headings(): array
+    {
+        return ["Apellido1", "Apellido2", "Nombre","DNI"];
+    }
+```
+En el controlador de alumnos, creamos los métodos export e import con el código siguiente
+También creamos el método index que recuperará todos los alumnos
+Igualemnte creamos la vista para visualizar todos los alumnos
+
+Ahora creamos las rutas
+```php
+Route::controller(AlumnosController::class)->group(function(){
+    Route::get('alumnos', 'index');
+    Route::get('alumnos-export', 'export')->name('alumnos.export');
+    Route::post('alumnos-import', 'import')->name('alumnos.import');
+});
+
+```
